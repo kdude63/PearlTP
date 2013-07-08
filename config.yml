@@ -4,8 +4,5 @@ cost: 1
 #How far players can teleport using coordinates
 max_distance: 2000
 
-#What to tell the player if they don't have permission to use /ptp
-noperm_message: "You don't have permission to use this command."
-
 #Allow players to teleport to other players?
 itp: true

@@ -52,7 +52,7 @@ public class main extends JavaPlugin implements Listener {
 		int amount = item.getAmount();
 		for (int c = 0; c < 36; c++) {
 			ItemStack slot = player.getInventory().getItem(c);
-			if (slot.getType() != null) {
+			if (slot != null) {
 				if (slot.getType() == m) {
 					if (slot.getAmount() > amount) {
 						slot.setAmount(slot.getAmount() - amount);
@@ -75,43 +75,58 @@ public class main extends JavaPlugin implements Listener {
 			if (sender instanceof Player) {
 				if (sender.hasPermission("pearltp.teleport")) {
 					if (args.length == 1) {
-						if (itp) {
-							if (Bukkit.getServer().getPlayer(args[0]) != null) {
-								// If sender is not trying to teleport to
-								// themself
-								if (Bukkit.getServer().getPlayer(
-										sender.getName()) != Bukkit.getServer()
-										.getPlayer(args[0])) {
-									if (player.getInventory().contains(
-											Material.ENDER_PEARL, cost)) {
-										removeItem(pearls, player);
-										Location target = Bukkit.getServer()
-												.getPlayer(args[0])
-												.getLocation();
-
-										// Initiate teleport
-										player.teleport(target);
-									} else {
-										sender.sendMessage(ChatColor.RED
-												+ "You need "
-												+ cost.toString()
-												+ " ender pearl(s) to teleport.");
-									}
-								} else {
-									sender.sendMessage("You can't teleport to yourself.");
+						if (args[0].equalsIgnoreCase("home")) {
+							//Check if the player currently has a bed spawn location
+							if (player.getBedSpawnLocation() != null) {
+								if (player.getInventory().contains(Material.ENDER_PEARL, cost)){
+									removeItem(pearls, player);
+									Location target = player.getBedSpawnLocation();
+									//Initiate teleport
+									player.teleport(target);
+								}else{
+									sender.sendMessage(ChatColor.RED
+											+ "You need "
+											+ cost.toString()
+											+ " ender pearl(s) to teleport.");
 								}
 							} else {
 								sender.sendMessage(ChatColor.RED
-										+ "Unable to find player " + args[0]);
+										+ ("No bed spawn is currently set. No tp."));
 							}
 						} else {
-							sender.sendMessage(ChatColor.RED + noperm);
+							if (itp) {
+								if (Bukkit.getServer().getPlayer(args[0]) != null) {
+									// If sender is not trying to teleport to themself
+									if (Bukkit.getServer().getPlayer(sender.getName()) != Bukkit.getServer().getPlayer(args[0])) {
+										if (player.getInventory().contains(Material.ENDER_PEARL, cost)) {
+											removeItem(pearls, player);
+											Location target = Bukkit.getServer().getPlayer(args[0]).getLocation();
+
+											// Initiate teleport
+											player.teleport(target);
+										} else {
+											sender.sendMessage(ChatColor.RED
+													+ "You need "
+													+ cost.toString()
+													+ " ender pearl(s) to teleport.");
+										}
+									} else {
+										sender.sendMessage(ChatColor.RED
+												+ "You can't teleport to yourself.");
+									}
+								} else {
+									sender.sendMessage("Unable to find player "
+											+ args[0]);
+								}
+							} else {
+								sender.sendMessage(ChatColor.RED
+										+ "Teleporting to other players is not allowed.");
+							}
 						}
 					} else if (args.length == 3) {
-						if (isNumber(args[0]) && isNumber(args[1])
-								&& isNumber(args[2])) {
-							if (player.getInventory().contains(
-									Material.ENDER_PEARL, cost)) {
+						//Check if all three arguments are numbers
+						if (isNumber(args[0]) && isNumber(args[1]) && isNumber(args[2])) {
+							if (player.getInventory().contains(Material.ENDER_PEARL, cost)) {
 								removeItem(pearls, player);
 								Location target = player.getLocation();
 
