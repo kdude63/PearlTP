@@ -22,7 +22,7 @@ public class main extends JavaPlugin implements Listener
 	Integer maxdist;
 	String noperm;
 	Boolean itp;
-	ItemStack pearls;
+	public static ItemStack pearls;
 	
 	@Override
 	public void onEnable()
@@ -47,32 +47,21 @@ public class main extends JavaPlugin implements Listener
 			return false;
 	}
 	
-	public void playerTeleport(String origin, String target){
-		Player oPlayer = Bukkit.getServer().getPlayer(origin);
-		Player tPlayer = Bukkit.getServer().getPlayer(target);
-		
-		//Get location of the target player
-		Location targetCoords = tPlayer.getLocation();
-		
-		//Teleport the origin player to the target player
-		oPlayer.teleport(targetCoords);
-	}
-	
 	//For removing items from their inventory
 	public void removeItem(ItemStack item, Player player) {
 		Material m = item.getType();
 		int amount = item.getAmount();
 		for(int c=0; c<36; c++) {
 			ItemStack slot = player.getInventory().getItem(c);
-			if(slot.getType() == m) {
+			if(slot.getType() == m && slot.getType() != null) {
     			if(slot.getAmount() > amount) {
     				slot.setAmount(slot.getAmount() - amount);
-                       return;
-                   }else{
+                    return;
+                }else{
                     amount -= slot.getAmount();
                     player.getInventory().clear(c);
                 }
-            }
+           	}
         }
 	}
 	
@@ -82,57 +71,51 @@ public class main extends JavaPlugin implements Listener
 			Player player = Bukkit.getServer().getPlayer(sender.getName());
 			//If the command sender is a player
 			if (sender instanceof Player){
-				if (sender.hasPermission("pearltp.notp") && sender.isOp() == false){
-					//Tell the command sender that they don't have permission to use the command
-					sender.sendMessage(ChatColor.RED + noperm);
-				//If the command sender has permission to use the command
-				}else{
-					if (args.length == 1){
-						if (itp){
-							if (Bukkit.getServer().getPlayer(args[0]) != null){
-								//If sender is not trying to teleport to themself
-								if (Bukkit.getServer().getPlayer(sender.getName()) != Bukkit.getServer().getPlayer(args[0])){
-									if (player.getInventory().contains(Material.ENDER_PEARL, cost)){					
-										removeItem(pearls, player);
-										Location target = Bukkit.getServer().getPlayer(args[0]).getLocation();
-										
-										//Initiate teleport
-										player.teleport(target);
-									}else{
-										sender.sendMessage(ChatColor.RED + "You need " + cost.toString() + " ender pearl(s) to teleport.");
-									}
+				if (args.length == 1){
+					if (itp){
+						if (Bukkit.getServer().getPlayer(args[0]) != null){
+							//If sender is not trying to teleport to themself
+							if (Bukkit.getServer().getPlayer(sender.getName()) != Bukkit.getServer().getPlayer(args[0])){
+								if (player.getInventory().contains(Material.ENDER_PEARL, cost)){					
+									removeItem(pearls, player);
+									Location target = Bukkit.getServer().getPlayer(args[0]).getLocation();
+									
+									//Initiate teleport
+									player.teleport(target);
 								}else{
-									sender.sendMessage("You can't teleport to yourself.");
+									sender.sendMessage(ChatColor.RED + "You need " + cost.toString() + " ender pearl(s) to teleport.");
 								}
 							}else{
-								sender.sendMessage(ChatColor.RED + "Unable to find player " + args[0]);
+								sender.sendMessage("You can't teleport to yourself.");
 							}
 						}else{
-							sender.sendMessage(ChatColor.RED + noperm);
+							sender.sendMessage(ChatColor.RED + "Unable to find player " + args[0]);
 						}
+					}else{
+						sender.sendMessage(ChatColor.RED + noperm);
 					}
-					else if (args.length == 3){
-						if (isNumber(args[0]) && isNumber(args[1]) && isNumber(args[2])){
-							if (player.getInventory().contains(Material.ENDER_PEARL, cost)){
-								removeItem(pearls, player);
-								Location target = player.getLocation();
-								
-								//Update target coordinates
-								target.setX(Double.parseDouble(args[0]));
-								target.setY(Double.parseDouble(args[1]));
-								target.setZ(Double.parseDouble(args[2]));
-								
-								//Intiate teleport
-								player.teleport(target);
-							}else{
-								sender.sendMessage(ChatColor.RED + "You need " + cost.toString() + " ender pearl(s) to teleport.");
-							}
+				}
+				else if (args.length == 3){
+					if (isNumber(args[0]) && isNumber(args[1]) && isNumber(args[2])){
+						if (player.getInventory().contains(Material.ENDER_PEARL, cost)){
+							removeItem(pearls, player);
+							Location target = player.getLocation();
+							
+							//Update target coordinates
+							target.setX(Double.parseDouble(args[0]));
+							target.setY(Double.parseDouble(args[1]));
+							target.setZ(Double.parseDouble(args[2]));
+							
+							//Intiate teleport
+							player.teleport(target);
 						}else{
-							return false;
+							sender.sendMessage(ChatColor.RED + "You need " + cost.toString() + " ender pearl(s) to teleport.");
 						}
 					}else{
 						return false;
 					}
+				}else{
+					return false;
 				}
 			}else{
 				//If the command sender is console
