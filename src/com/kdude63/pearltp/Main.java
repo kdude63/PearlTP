@@ -1,25 +1,23 @@
 package com.kdude63.pearltp;
 
-import java.io.File;
-import java.util.logging.Logger;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.command.*;
-import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
 
-public class main extends JavaPlugin implements Listener {
-	Logger log = Logger.getLogger("Minecraft");
+import java.io.File;
+
+public class Main extends JavaPlugin implements Listener {
 	FileConfiguration config;
 	Integer cost;
 	Integer maxdist;
-	String noperm;
 	Boolean itp;
 	public static ItemStack pearls;
 
@@ -32,8 +30,7 @@ public class main extends JavaPlugin implements Listener {
 			saveDefaultConfig();
 
 		cost = config.getInt("cost");
-		maxdist = config.getInt("max_distance");
-		noperm = config.getString("noperm_message");
+		maxdist = config.getInt("maxdistance");
 		itp = config.getBoolean("itp");
 		pearls = new ItemStack(Material.ENDER_PEARL, cost);
 	}
@@ -46,10 +43,10 @@ public class main extends JavaPlugin implements Listener {
 			return false;
 	}
 
-	// For removing items from their inventory
-	public void removeItem(ItemStack item, Player player) {
-		Material m = item.getType();
-		int amount = item.getAmount();
+	// For removing pearls from their inventory
+	public void removePearls(Player player) {
+		Material m = pearls.getType();
+		int amount = pearls.getAmount();
 		for (int c = 0; c < 36; c++) {
 			ItemStack slot = player.getInventory().getItem(c);
 			if (slot != null) {
@@ -79,7 +76,7 @@ public class main extends JavaPlugin implements Listener {
 							//Check if the player currently has a bed spawn location
 							if (player.getBedSpawnLocation() != null) {
 								if (player.getInventory().contains(Material.ENDER_PEARL, cost)){
-									removeItem(pearls, player);
+									removePearls(player);
 									Location target = player.getBedSpawnLocation();
 									//Initiate teleport
 									player.teleport(target);
@@ -99,7 +96,7 @@ public class main extends JavaPlugin implements Listener {
 									// If sender is not trying to teleport to themself
 									if (Bukkit.getServer().getPlayer(sender.getName()) != Bukkit.getServer().getPlayer(args[0])) {
 										if (player.getInventory().contains(Material.ENDER_PEARL, cost)) {
-											removeItem(pearls, player);
+											removePearls(player);
 											Location target = Bukkit.getServer().getPlayer(args[0]).getLocation();
 
 											// Initiate teleport
@@ -127,7 +124,7 @@ public class main extends JavaPlugin implements Listener {
 						//Check if all three arguments are numbers
 						if (isNumber(args[0]) && isNumber(args[1]) && isNumber(args[2])) {
 							if (player.getInventory().contains(Material.ENDER_PEARL, cost)) {
-								removeItem(pearls, player);
+								removePearls(player);
 								Location target = player.getLocation();
 
 								// Update target coordinates

@@ -1,9 +1,9 @@
-name: PearlTP
-main: com.kdude63.pearltp.main
-version: 1.1 (Build 35)
+name: '${project.name}'
+main: com.kdude63.pearltp.Main
+version: '${project.version}'
 description: Allows everyone to teleport at the cost of a configurable amount of enderpearls.
 author: kdude63
-dev-url: http://dev.bukkit.org/server-mods/pearltp/
+dev-url: '${project.url}'
 commands:
     ptp:
        description: Teleports yourself to another player or coordinates.

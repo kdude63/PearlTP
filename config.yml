@@ -2,7 +2,7 @@
 cost: 1
 
 #How far players can teleport using coordinates
-max_distance: 2000
+maxdistance: 2000
 
 #Allow players to teleport to other players?
 itp: true
