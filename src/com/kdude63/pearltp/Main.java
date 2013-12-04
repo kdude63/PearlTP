@@ -93,13 +93,17 @@ public class Main extends JavaPlugin implements Listener {
 				if (sender.hasPermission("pearltp.teleport")) {
 					if (args.length == 1) {
 						if (args[0] != "home") {
-							Player playerFrom = Bukkit.getServer().getPlayer(sender.getName());
-							Player playerTo = Bukkit.getServer().getPlayer(args[0]);
+							if (itp) {
+								Player playerFrom = Bukkit.getServer().getPlayer(sender.getName());
+								Player playerTo = Bukkit.getServer().getPlayer(args[0]);
 
-							if (playerTo != null) {
-								initTeleport(playerFrom, playerTo.getLocation());
+								if (playerTo != null) {
+									initTeleport(playerFrom, playerTo.getLocation());
+								} else {
+									sender.sendMessage(ChatColor.RED + "Could not find player " + args[0]);
+								}
 							} else {
-								sender.sendMessage(ChatColor.RED + "Could not find player " + args[0]);
+								sender.sendMessage(ChatColor.RED + "Teleporting to other players is not allowed.");
 							}
 						} else {
 							Player playerFrom = Bukkit.getServer().getPlayer(sender.getName());
