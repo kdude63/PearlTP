@@ -80,7 +80,7 @@ public class Main extends JavaPlugin implements Listener {
 			origin.teleport(target);
 			removePearls(origin);
 		} else {
-			origin.sendMessage(ChatColor.RED + "Target is too far away! You need to be " + dist.intValue() +  "blocks closer.");
+			origin.sendMessage(ChatColor.RED + "Target is too far away! You need to be " + dist.intValue() +  " blocks closer.");
 		}
 	}
 
@@ -92,7 +92,7 @@ public class Main extends JavaPlugin implements Listener {
 			if (sender instanceof Player) {
 				if (sender.hasPermission("pearltp.teleport")) {
 					if (args.length == 1) {
-						if (args[0] != "home") {
+						if (!args[0].equalsIgnoreCase("home")) {
 							if (itp) {
 								Player playerFrom = Bukkit.getServer().getPlayer(sender.getName());
 								Player playerTo = Bukkit.getServer().getPlayer(args[0]);
@@ -109,8 +109,12 @@ public class Main extends JavaPlugin implements Listener {
 							Player playerFrom = Bukkit.getServer().getPlayer(sender.getName());
 							Location target = playerFrom.getBedSpawnLocation();
 
-							if (target != null)
+							if (target != null) {
+								target.setY(target.getY() + 1);
 								initTeleport(playerFrom, target);
+							} else {
+								sender.sendMessage(ChatColor.RED + "Bed not set. No TP.");
+							}
 						}
 					} else if (args.length == 3) {
 						if ((args[0]+args[1]+args[2]).matches("-?\\d+(\\.\\d+)?")) {
