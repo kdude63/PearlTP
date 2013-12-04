@@ -11,14 +11,21 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.mcstats.MetricsLite;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Main extends JavaPlugin implements Listener {
+	Logger logger = Logger.getLogger("Minecraft");
 	FileConfiguration config;
+
 	Integer cost;
 	Integer maxdist;
 	Boolean itp;
+
 	public static ItemStack pearls;
 
 	@Override
@@ -29,28 +36,30 @@ public class Main extends JavaPlugin implements Listener {
 				+ "config.yml").exists())
 			saveDefaultConfig();
 
+		// Load values from configuration
 		cost = config.getInt("cost");
 		maxdist = config.getInt("maxdistance");
 		itp = config.getBoolean("itp");
+
+		// We only need to initialize this once
 		pearls = new ItemStack(Material.ENDER_PEARL, cost);
+
+		// Start metrics
+		try {
+			MetricsLite metrics = new MetricsLite(this);
+			metrics.start();
+		} catch (IOException e) {
+			logger.log(Level.SEVERE, e.getMessage());
+		}
 	}
 
-	// For checking if a string is a number
-	public boolean isNumber(String n) {
-		if (n.matches("-?\\d+(\\.\\d+)?"))
-			return true;
-		else
-			return false;
-	}
-
-	// For removing pearls from their inventory
+	// Remove pearls from the player's inventory
 	public void removePearls(Player player) {
-		Material m = pearls.getType();
-		int amount = pearls.getAmount();
+		int amount = cost;
 		for (int c = 0; c < 36; c++) {
 			ItemStack slot = player.getInventory().getItem(c);
 			if (slot != null) {
-				if (slot.getType() == m) {
+				if (slot.getType() == Material.ENDER_PEARL) {
 					if (slot.getAmount() > amount) {
 						slot.setAmount(slot.getAmount() - amount);
 						return;
@@ -63,82 +72,53 @@ public class Main extends JavaPlugin implements Listener {
 		}
 	}
 
+	// Initiate teleport 'n shit
+	public void initTeleport(Player origin, Location target) {
+		Double dist = origin.getLocation().distance(target);
+
+		if (dist < maxdist) {
+			origin.teleport(target);
+			removePearls(origin);
+		} else {
+			origin.sendMessage(ChatColor.RED + "Target is too far away! You need to be " + dist.intValue() +  "blocks closer.");
+		}
+	}
+
 	// Command function
 	public boolean onCommand(CommandSender sender, Command cmd, String label,
 			String[] args) {
 		if (cmd.getName().equalsIgnoreCase("ptp")) {
-			Player player = Bukkit.getServer().getPlayer(sender.getName());
 			// If the command sender is a player
 			if (sender instanceof Player) {
 				if (sender.hasPermission("pearltp.teleport")) {
 					if (args.length == 1) {
-						if (args[0].equalsIgnoreCase("home")) {
-							//Check if the player currently has a bed spawn location
-							if (player.getBedSpawnLocation() != null) {
-								if (player.getInventory().contains(Material.ENDER_PEARL, cost)){
-									removePearls(player);
-									Location target = player.getBedSpawnLocation();
-									//Initiate teleport
-									player.teleport(target);
-								}else{
-									sender.sendMessage(ChatColor.RED
-											+ "You need "
-											+ cost.toString()
-											+ " ender pearl(s) to teleport.");
-								}
+						if (args[0] != "home") {
+							Player playerFrom = Bukkit.getServer().getPlayer(sender.getName());
+							Player playerTo = Bukkit.getServer().getPlayer(args[0]);
+
+							if (playerTo != null) {
+								initTeleport(playerFrom, playerTo.getLocation());
 							} else {
-								sender.sendMessage(ChatColor.RED
-										+ ("No bed spawn is currently set. No tp."));
+								sender.sendMessage(ChatColor.RED + "Could not find player " + args[0]);
 							}
 						} else {
-							if (itp) {
-								if (Bukkit.getServer().getPlayer(args[0]) != null) {
-									// If sender is not trying to teleport to themself
-									if (Bukkit.getServer().getPlayer(sender.getName()) != Bukkit.getServer().getPlayer(args[0])) {
-										if (player.getInventory().contains(Material.ENDER_PEARL, cost)) {
-											removePearls(player);
-											Location target = Bukkit.getServer().getPlayer(args[0]).getLocation();
+							Player playerFrom = Bukkit.getServer().getPlayer(sender.getName());
+							Location target = playerFrom.getBedSpawnLocation();
 
-											// Initiate teleport
-											player.teleport(target);
-										} else {
-											sender.sendMessage(ChatColor.RED
-													+ "You need "
-													+ cost.toString()
-													+ " ender pearl(s) to teleport.");
-										}
-									} else {
-										sender.sendMessage(ChatColor.RED
-												+ "You can't teleport to yourself.");
-									}
-								} else {
-									sender.sendMessage("Unable to find player "
-											+ args[0]);
-								}
-							} else {
-								sender.sendMessage(ChatColor.RED
-										+ "Teleporting to other players is not allowed.");
-							}
+							if (target != null)
+								initTeleport(playerFrom, target);
 						}
 					} else if (args.length == 3) {
-						//Check if all three arguments are numbers
-						if (isNumber(args[0]) && isNumber(args[1]) && isNumber(args[2])) {
-							if (player.getInventory().contains(Material.ENDER_PEARL, cost)) {
-								removePearls(player);
-								Location target = player.getLocation();
+						if ((args[0]+args[1]+args[2]).matches("-?\\d+(\\.\\d+)?")) {
 
-								// Update target coordinates
-								target.setX(Double.parseDouble(args[0]));
-								target.setY(Double.parseDouble(args[1]));
-								target.setZ(Double.parseDouble(args[2]));
+							Player playerFrom = Bukkit.getServer().getPlayer(sender.getName());
 
-								// Intiate teleport
-								player.teleport(target);
-							} else {
-								sender.sendMessage(ChatColor.RED + "You need "
-										+ cost.toString()
-										+ " ender pearl(s) to teleport.");
-							}
+							Location target = Bukkit.getServer().getPlayer(sender.getName()).getLocation();
+							target.setX(Double.parseDouble(args[0]));
+							target.setY(Double.parseDouble(args[1]));
+							target.setZ(Double.parseDouble(args[2]));
+
+							initTeleport(playerFrom, target);
 						} else {
 							return false;
 						}
