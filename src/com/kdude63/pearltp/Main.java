@@ -96,55 +96,57 @@ public class Main extends JavaPlugin implements Listener {
 		if (cmd.getName().equalsIgnoreCase("ptp")) {
 			// If the command sender is a player
 			if (sender instanceof Player) {
-				if (args.length == 1) {
-					if (!args[0].equalsIgnoreCase("home")) {
-						if (p2p || sender.hasPermission("pearltp.teleport.playertoplayer") || sender.hasPermission("pearltp.teleport")) {
-							Player playerFrom = Bukkit.getServer().getPlayer(sender.getName());
-							Player playerTo = Bukkit.getServer().getPlayer(args[0]);
+				if (sender.hasPermission("pearltp.teleport")) {
+					if (args.length == 1) {
+						if (!args[0].equalsIgnoreCase("home")) {
+							if (p2p) {
+								Player playerFrom = Bukkit.getServer().getPlayer(sender.getName());
+								Player playerTo = Bukkit.getServer().getPlayer(args[0]);
 
-							if (playerTo != null) {
-								initTeleport(playerFrom, playerTo.getLocation());
+								if (playerTo != null) {
+									initTeleport(playerFrom, playerTo.getLocation());
+								} else {
+									sender.sendMessage(ChatColor.RED + "Could not find player " + args[0] + ".");
+								}
 							} else {
-								sender.sendMessage(ChatColor.RED + "Could not find player " + args[0]);
+								sender.sendMessage(ChatColor.RED + "Player teleportation is disabled.");
 							}
 						} else {
-							sender.sendMessage(ChatColor.RED + "You don't have permission to do that.");
-						}
-					} else {
-						Player playerFrom = Bukkit.getServer().getPlayer(sender.getName());
-						Location target = playerFrom.getBedSpawnLocation();
+							Player playerFrom = Bukkit.getServer().getPlayer(sender.getName());
+							Location target = playerFrom.getBedSpawnLocation();
 
-						if (p2b || sender.hasPermission("pearltp.teleport.playertobed") || sender.hasPermission("pearltp.teleport")) {
-							if (target != null) {
-								target.setY(target.getY() + 1);
+							if (p2b) {
+								if (target != null) {
+									target.setY(target.getY() + 1);
+									initTeleport(playerFrom, target);
+								} else {
+									sender.sendMessage(ChatColor.RED + "Bed not set. No TP.");
+								}
+							} else {
+								sender.sendMessage(ChatColor.RED + "Bed teleportation is disabled.");
+							}
+						}
+					} else if (args.length == 3) {
+						if (p2c) {
+							if ((args[0]+args[1]+args[2]).matches("-?\\d+(\\.\\d+)?")) {
+
+								Player playerFrom = Bukkit.getServer().getPlayer(sender.getName());
+
+								Location target = Bukkit.getServer().getPlayer(sender.getName()).getLocation();
+								target.setX(Double.parseDouble(args[0]));
+								target.setY(Double.parseDouble(args[1]));
+								target.setZ(Double.parseDouble(args[2]));
+
 								initTeleport(playerFrom, target);
 							} else {
-								sender.sendMessage(ChatColor.RED + "Bed not set. No TP.");
+								return false;
 							}
 						} else {
-							sender.sendMessage(ChatColor.RED + "You don't have permission to do that.");
-						}
-					}
-				} else if (args.length == 3) {
-					if (p2c || sender.hasPermission("pearltp.teleport.playertocoordinates") || sender.hasPermission("pearltp.teleport")) {
-						if ((args[0]+args[1]+args[2]).matches("-?\\d+(\\.\\d+)?")) {
-
-							Player playerFrom = Bukkit.getServer().getPlayer(sender.getName());
-
-							Location target = Bukkit.getServer().getPlayer(sender.getName()).getLocation();
-							target.setX(Double.parseDouble(args[0]));
-							target.setY(Double.parseDouble(args[1]));
-							target.setZ(Double.parseDouble(args[2]));
-
-							initTeleport(playerFrom, target);
-						} else {
-							return false;
+							sender.sendMessage(ChatColor.RED + "Coordinate teleportation is disabled.");
 						}
 					} else {
-						sender.sendMessage(ChatColor.RED + "You don't have permission to do that.");
+						return false;
 					}
-				} else {
-					return false;
 				}
 			}
 		} else {
