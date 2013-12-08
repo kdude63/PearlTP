@@ -1,7 +1,7 @@
 name: '${project.name}'
 main: com.kdude63.pearltp.Main
 version: '${project.version}'
-description: Allows everyone to teleport at the cost of a configurable amount of enderpearls.
+description: Allows players to teleport at the cost of a configurable amount of enderpearls.
 author: kdude63
 dev-url: '${project.url}'
 commands:
