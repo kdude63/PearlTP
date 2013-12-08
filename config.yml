@@ -1,8 +1,13 @@
-#The number of pearls it costs to teleport
+#How many pearls does it cost to teleport?
 cost: 1
 
-#How far players can teleport using coordinates
+#How far can players teleport?
 maxdistance: 2000
 
-#Allow players to teleport to other players?
-itp: true
+teleport:
+	#Allow players to teleport to other players?
+	playertoplayer: true
+	#Allow players to teleport to specified coordinates?
+	playertocoordinates: true
+	#Allow players to teleport to their bed?
+	playertobed: true
