@@ -24,7 +24,10 @@ public class Main extends JavaPlugin implements Listener {
 
 	Integer cost;
 	Integer maxdist;
-	Boolean itp;
+
+	Boolean p2p;
+	Boolean p2c;
+	Boolean p2b;
 
 	public static ItemStack pearls;
 
@@ -39,7 +42,11 @@ public class Main extends JavaPlugin implements Listener {
 		// Load values from configuration
 		cost = config.getInt("cost");
 		maxdist = config.getInt("maxdistance");
-		itp = config.getBoolean("itp");
+
+		p2p = config.getBoolean("teleport.playertoplayer");
+		p2c = config.getBoolean("teleport.playertocoordinates");
+		p2b = config.getBoolean("teleport.playertobed");
+
 
 		// We only need to initialize this once
 		pearls = new ItemStack(Material.ENDER_PEARL, cost);
@@ -85,38 +92,41 @@ public class Main extends JavaPlugin implements Listener {
 	}
 
 	// Command function
-	public boolean onCommand(CommandSender sender, Command cmd, String label,
-			String[] args) {
+	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		if (cmd.getName().equalsIgnoreCase("ptp")) {
 			// If the command sender is a player
 			if (sender instanceof Player) {
-				if (sender.hasPermission("pearltp.teleport")) {
-					if (args.length == 1) {
-						if (!args[0].equalsIgnoreCase("home")) {
-							if (itp) {
-								Player playerFrom = Bukkit.getServer().getPlayer(sender.getName());
-								Player playerTo = Bukkit.getServer().getPlayer(args[0]);
+				if (args.length == 1) {
+					if (!args[0].equalsIgnoreCase("home")) {
+						if (p2p || sender.hasPermission("pearltp.teleport.playertoplayer") || sender.hasPermission("pearltp.teleport")) {
+							Player playerFrom = Bukkit.getServer().getPlayer(sender.getName());
+							Player playerTo = Bukkit.getServer().getPlayer(args[0]);
 
-								if (playerTo != null) {
-									initTeleport(playerFrom, playerTo.getLocation());
-								} else {
-									sender.sendMessage(ChatColor.RED + "Could not find player " + args[0]);
-								}
+							if (playerTo != null) {
+								initTeleport(playerFrom, playerTo.getLocation());
 							} else {
-								sender.sendMessage(ChatColor.RED + "Teleporting to other players is not allowed.");
+								sender.sendMessage(ChatColor.RED + "Could not find player " + args[0]);
 							}
 						} else {
-							Player playerFrom = Bukkit.getServer().getPlayer(sender.getName());
-							Location target = playerFrom.getBedSpawnLocation();
+							sender.sendMessage(ChatColor.RED + "You don't have permission to do that.");
+						}
+					} else {
+						Player playerFrom = Bukkit.getServer().getPlayer(sender.getName());
+						Location target = playerFrom.getBedSpawnLocation();
 
+						if (p2b || sender.hasPermission("pearltp.teleport.playertobed") || sender.hasPermission("pearltp.teleport")) {
 							if (target != null) {
 								target.setY(target.getY() + 1);
 								initTeleport(playerFrom, target);
 							} else {
 								sender.sendMessage(ChatColor.RED + "Bed not set. No TP.");
 							}
+						} else {
+							sender.sendMessage(ChatColor.RED + "You don't have permission to do that.");
 						}
-					} else if (args.length == 3) {
+					}
+				} else if (args.length == 3) {
+					if (p2c || sender.hasPermission("pearltp.teleport.playertocoordinates") || sender.hasPermission("pearltp.teleport")) {
 						if ((args[0]+args[1]+args[2]).matches("-?\\d+(\\.\\d+)?")) {
 
 							Player playerFrom = Bukkit.getServer().getPlayer(sender.getName());
@@ -131,16 +141,16 @@ public class Main extends JavaPlugin implements Listener {
 							return false;
 						}
 					} else {
-						return false;
+						sender.sendMessage(ChatColor.RED + "You don't have permission to do that.");
 					}
+				} else {
+					return false;
 				}
-			} else {
-				// If the command sender is console
-				sender.sendMessage("Console can't use this command!");
 			}
-			return true;
 		} else {
-			return false;
+			// If the command sender is console
+			sender.sendMessage("Console can't use this command!");
 		}
+		return true;
 	}
 }
