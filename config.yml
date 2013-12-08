@@ -5,9 +5,9 @@ cost: 1
 maxdistance: 2000
 
 teleport:
-	#Allow players to teleport to other players?
-	playertoplayer: true
-	#Allow players to teleport to specified coordinates?
-	playertocoordinates: true
-	#Allow players to teleport to their bed?
-	playertobed: true
+    #Allow players to teleport to other players?
+    playertoplayer: true
+    #Allow players to teleport to specified coordinates?
+    playertocoordinates: true
+    #Allow players to teleport to their bed?
+    playertobed: true
